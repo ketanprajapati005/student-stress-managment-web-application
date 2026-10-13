@@ -21,7 +21,12 @@ npm install
 npm run dev            # http://localhost:4000
 ```
 
-The frontend calls the backend at `http://localhost:4000/api` by default; set `VITE_API_BASE_URL` to point it elsewhere.
+In development the frontend calls the backend at `http://localhost:4000/api`. In production (Vercel) the AI Assistant, Stress Predictor and Study Planner use the serverless functions in `api/`, which run the same code as the backend. Set these in Vercel → Settings → Environment Variables:
+
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` – used by the frontend and to check the user is signed in
+- `OPENROUTER_API_KEY` – used by the AI functions (optional `OPENROUTER_MODEL`)
+
+Set `VITE_API_BASE_URL` to point the frontend at a different API.
 
 The Supabase edge functions read `LOVABLE_API_KEY`, `OPENROUTER_API_KEY` or `GEMINI_API_KEY` from the function secrets (`supabase secrets set ...`). Never put AI keys in a `VITE_` variable: those are bundled into the public frontend.
 
