@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Calendar, BookOpen, Target, Lightbulb } from "lucide-react";
-import { API_BASE_URL } from "@/lib/api";
+import { postApi } from "@/lib/api";
 import { getErrorMessage } from "@/lib/utils";
 
 
@@ -37,25 +37,13 @@ export default function StudyPlanner() {
     setPlan(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/ai/study-plan`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          subject,
-          hoursPerDay,
-          goal,
-          currentLevel: currentLevel || undefined,
-          deadline: deadline || undefined,
-        }),
+      const data = await postApi<StudyPlan>("/ai/study-plan", {
+        subject,
+        hoursPerDay,
+        goal,
+        currentLevel: currentLevel || undefined,
+        deadline: deadline || undefined,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate study plan");
-      }
-
-      const data = await response.json();
       setPlan(data);
     } catch (error) {
       console.error("Error:", error);

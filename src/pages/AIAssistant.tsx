@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Send, MessageSquare, Bot } from "lucide-react";
-import { API_BASE_URL } from "@/lib/api";
+import { postApi } from "@/lib/api";
 import { getErrorMessage } from "@/lib/utils";
 
 type Message = {
@@ -47,22 +47,10 @@ export default function AIAssistant() {
         content: m.content,
       }));
 
-      const response = await fetch(`${API_BASE_URL}/ai/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: userMessage.content,
-          history: history.slice(-10), // Last 10 messages for context
-        }),
+      const data = await postApi<{ reply: string }>("/ai/chat", {
+        message: userMessage.content,
+        history: history.slice(-10), // Last 10 messages for context
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to get AI response");
-      }
-
-      const data = await response.json();
       const assistantMessage: Message = { role: "assistant", content: data.reply };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {

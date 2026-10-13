@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb } from "lucide-react";
-import { API_BASE_URL } from "@/lib/api";
+import { postApi } from "@/lib/api";
 import { getErrorMessage } from "@/lib/utils";
 
 
@@ -34,24 +34,12 @@ export default function StressPredictor() {
     setResult(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/ai/stress`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          mood,
-          sleepHours,
-          studyHours,
-          anxiety,
-        }),
+      const data = await postApi<StressPrediction>("/ai/stress", {
+        mood,
+        sleepHours,
+        studyHours,
+        anxiety,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to predict stress level");
-      }
-
-      const data = await response.json();
       setResult(data);
     } catch (error) {
       console.error("Error:", error);
