@@ -51,6 +51,6 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
   console.log(`📡 CORS enabled for: ${CORS_ORIGIN}`);
-  console.log(`🔑 OpenRouter API: ${process.env.OPENROUTER_API_KEY ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`🔑 AI provider: ${process.env.GEMINI_API_KEY ? "Gemini" : process.env.OPENROUTER_API_KEY ? "OpenRouter" : "❌ Not configured"}`);
 });
 

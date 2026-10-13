@@ -1,4 +1,4 @@
-import { callOpenRouter } from "../utils/openrouter.js";
+import { callAI } from "../utils/ai.js";
 
 const respond = (status, body) => ({ status, body });
 
@@ -47,7 +47,7 @@ Make the plan realistic, actionable, and tailored to the available hours. Includ
 
     let aiResponse;
     try {
-      aiResponse = await callOpenRouter(prompt, systemPrompt);
+      aiResponse = await callAI(prompt, systemPrompt);
 
       // Try to parse JSON response
       let parsedResponse;
@@ -100,7 +100,7 @@ Make the plan realistic, actionable, and tailored to the available hours. Includ
     } catch (aiError) {
       console.error("Study planner AI error:", aiError);
       return respond(500, {
-        error: "Failed to generate study plan. Please try again.",
+        error: aiError.message || "Failed to generate study plan. Please try again.",
       });
     }
   } catch (error) {

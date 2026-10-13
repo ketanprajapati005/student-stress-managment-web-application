@@ -22,11 +22,14 @@ export default function AIAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Scroll only the message list; scrollIntoView would also scroll the whole page
+    // and push the header out of view.
+    const list = messagesRef.current;
+    list?.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -78,12 +81,12 @@ export default function AIAssistant() {
         <div>
           <h1 className="text-2xl font-bold">AI Assistant</h1>
           <p className="text-muted-foreground">
-            Chat with your AI wellness coach powered by OpenRouter
+            Chat with your AI wellness coach
           </p>
         </div>
 
         <div className="glass-card rounded-xl p-4 space-y-4 border border-border/60">
-          <div className="h-[500px] overflow-y-auto pr-2 space-y-4">
+          <div ref={messagesRef} className="h-[min(500px,55vh)] overflow-y-auto pr-2 space-y-4">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
@@ -126,7 +129,6 @@ export default function AIAssistant() {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
 
           <div className="space-y-3">
@@ -140,7 +142,7 @@ export default function AIAssistant() {
                   handleSend();
                 }
               }}
-              className="min-h-[100px]"
+              className="min-h-[80px]"
             />
             <div className="flex justify-end">
               <Button onClick={handleSend} disabled={loading || !input.trim()}>

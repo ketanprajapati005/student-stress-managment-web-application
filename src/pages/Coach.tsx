@@ -462,7 +462,7 @@ export default function Coach() {
         )}
 
         <div className="glass-card rounded-xl p-4 space-y-4 border border-border/60">
-          <div className="h-[420px] overflow-y-auto pr-2 space-y-3">
+          <div className="h-[min(420px,50vh)] overflow-y-auto pr-2 space-y-3">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
