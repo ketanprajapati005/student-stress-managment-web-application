@@ -9,30 +9,34 @@ const router = express.Router();
  */
 router.post("/stress", async (req, res) => {
   try {
-    const { mood, sleepHours, studyHours, anxiety } = req.body;
+    const mood = Number(req.body.mood);
+    const sleepHours = Number(req.body.sleepHours);
+    const studyHours = Number(req.body.studyHours);
+    const anxiety = Number(req.body.anxiety);
 
     // Validate inputs
     if (
-      mood === undefined ||
-      sleepHours === undefined ||
-      studyHours === undefined ||
-      anxiety === undefined
+      [mood, sleepHours, studyHours, anxiety].some((v) => !Number.isFinite(v)) ||
+      mood < 1 || mood > 10 ||
+      anxiety < 0 || anxiety > 10 ||
+      sleepHours < 0 || sleepHours > 24 ||
+      studyHours < 0 || studyHours > 24
     ) {
       return res.status(400).json({
-        error: "All fields are required: mood, sleepHours, studyHours, anxiety",
+        error:
+          "All fields are required: mood (1-10), sleepHours (0-24), studyHours (0-24), anxiety (0-10)",
       });
     }
 
-    // Calculate stress score (0-100)
+    // Calculate stress score (0-100) as a weighted average of 0-100 factor scores.
     // Higher stress = lower mood, less sleep, more study hours, higher anxiety
-    const moodWeight = (10 - mood) * 10; // mood is 1-10, inverted
-    const sleepWeight = sleepHours < 7 ? (7 - sleepHours) * 5 : 0;
-    const studyWeight = studyHours > 8 ? (studyHours - 8) * 3 : 0;
-    const anxietyWeight = anxiety * 10; // anxiety is 0-10
+    const moodScore = ((10 - mood) / 9) * 100; // mood is 1-10, inverted
+    const anxietyScore = anxiety * 10; // anxiety is 0-10
+    const sleepScore = Math.min(100, Math.max(0, (7 - sleepHours) * 20)); // 2h or less = 100
+    const studyScore = Math.min(100, Math.max(0, (studyHours - 8) * 12.5)); // 16h or more = 100
 
-    const stressScore = Math.min(
-      100,
-      Math.round((moodWeight + sleepWeight + studyWeight + anxietyWeight) / 4)
+    const stressScore = Math.round(
+      moodScore * 0.3 + anxietyScore * 0.3 + sleepScore * 0.2 + studyScore * 0.2
     );
 
     // Determine risk level

@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { AlertTriangle, CheckCircle, Bell, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn, getErrorMessage } from "@/lib/utils";
 
 interface Alert {
   id: string;
@@ -54,10 +54,10 @@ export default function Alerts() {
           alert.id === id ? { ...alert, is_read: true } : alert
         )
       );
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     }
@@ -77,10 +77,10 @@ export default function Alerts() {
 
       setAlerts(alerts.map((alert) => ({ ...alert, is_read: true })));
       toast({ title: "All alerts marked as read" });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     }

@@ -1,15 +1,14 @@
+// Must be the first import: ES modules evaluate imports before this file's body,
+// so route modules would otherwise read process.env before .env is loaded.
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import aiChatRouter from "./routes/aiChat.js";
 import stressAIRouter from "./routes/stressAI.js";
 import studyPlannerRouter from "./routes/studyPlanner.js";
 import uploadsRouter from "./routes/uploads.js";
-
-// Load environment variables
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

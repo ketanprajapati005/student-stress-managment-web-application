@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, File, X, CheckCircle2 } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
+import { getErrorMessage } from "@/lib/utils";
 
-const API_BASE_URL = "http://localhost:4000/api";
 
 type UploadedFile = {
   fileUrl: string;
@@ -43,7 +44,8 @@ export default function Uploads() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to upload file");
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error || "Failed to upload file");
       }
 
       const data = await response.json();
@@ -57,11 +59,11 @@ export default function Uploads() {
         title: "Success",
         description: "File uploaded successfully!",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to upload file. Please try again.",
+        description: getErrorMessage(error, "Failed to upload file. Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -194,7 +196,7 @@ export default function Uploads() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        window.open(`${API_BASE_URL}${uploadedFile.fileUrl}`, "_blank");
+                        window.open(`${API_BASE_URL}/upload/${encodeURIComponent(uploadedFile.filename)}`, "_blank");
                       }}
                     >
                       View

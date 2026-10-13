@@ -121,7 +121,7 @@ export default function Recommendations() {
       } else if (data) {
         setRecommendation(data);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching recommendations:", err);
       toast({
         title: "Error",

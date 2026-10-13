@@ -1,6 +1,5 @@
 import fetch from "node-fetch";
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 /**
@@ -11,6 +10,7 @@ const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
  * @returns {Promise<string>} - AI response text
  */
 export async function callOpenRouter(prompt, systemPrompt = null, history = []) {
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
   if (!OPENROUTER_API_KEY) {
     throw new Error("OPENROUTER_API_KEY is not configured");
   }
@@ -24,9 +24,20 @@ export async function callOpenRouter(prompt, systemPrompt = null, history = []) 
     });
   }
 
-  // Add conversation history
-  if (history.length > 0) {
-    messages.push(...history);
+  // Add conversation history. Only well-formed user/assistant turns are kept so
+  // clients can't inject their own system prompts.
+  if (Array.isArray(history)) {
+    messages.push(
+      ...history
+        .filter(
+          (m) =>
+            m &&
+            (m.role === "user" || m.role === "assistant") &&
+            typeof m.content === "string"
+        )
+        .slice(-10)
+        .map(({ role, content }) => ({ role, content }))
+    );
   }
 
   // Add current user message
@@ -45,7 +56,7 @@ export async function callOpenRouter(prompt, systemPrompt = null, history = []) 
         "X-Title": "Stress Relief Hub",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-exp:free",
+        model: process.env.OPENROUTER_MODEL || "google/gemini-2.5-flash",
         messages: messages,
       }),
     });

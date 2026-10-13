@@ -6,8 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
+import { getErrorMessage } from "@/lib/utils";
 
-const API_BASE_URL = "http://localhost:4000/api";
+
+type StressPrediction = {
+  stressScore: number;
+  riskLevel: "low" | "moderate" | "high";
+  explanation?: string;
+  advice?: string;
+  immediateActions?: string[];
+  longTermTips?: string[];
+};
 
 export default function StressPredictor() {
   const [mood, setMood] = useState(5);
@@ -15,7 +25,7 @@ export default function StressPredictor() {
   const [studyHours, setStudyHours] = useState(4);
   const [anxiety, setAnxiety] = useState(5);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<StressPrediction | null>(null);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,11 +53,11 @@ export default function StressPredictor() {
 
       const data = await response.json();
       setResult(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to predict stress level. Please try again.",
+        description: getErrorMessage(error, "Failed to predict stress level. Please try again."),
         variant: "destructive",
       });
     } finally {

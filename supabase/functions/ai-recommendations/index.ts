@@ -1,11 +1,9 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -28,13 +26,12 @@ serve(async (req) => {
     }
 
     const apiKey = useLovable ? LOVABLE_API_KEY! : useOpenRouter ? OPENROUTER_API_KEY! : GEMINI_API_KEY!;
-    const useDirectGemini = !useLovable && !useOpenRouter;
     
     const model = useLovable
       ? "google/gemini-2.5-flash"
       : useOpenRouter
-        ? "google/gemini-flash-1.5-8b"
-        : "gemini-2.0-flash-exp";
+        ? "google/gemini-2.5-flash"
+        : "gemini-2.5-flash";
 
     console.log(
       "ai-recommendations provider",

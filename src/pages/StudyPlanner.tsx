@@ -7,10 +7,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Calendar, BookOpen, Target, Lightbulb } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
+import { getErrorMessage } from "@/lib/utils";
 
-const API_BASE_URL = "http://localhost:4000/api";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
+type StudyPlan = {
+  planOverview?: string;
+  weeklySchedule?: Record<string, string[]>;
+  studyTechniques?: string[];
+  milestones?: string[];
+  tips?: string[];
+};
 
 export default function StudyPlanner() {
   const [subject, setSubject] = useState("");
@@ -19,7 +28,7 @@ export default function StudyPlanner() {
   const [currentLevel, setCurrentLevel] = useState("");
   const [deadline, setDeadline] = useState("");
   const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState<any>(null);
+  const [plan, setPlan] = useState<StudyPlan | null>(null);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,11 +57,11 @@ export default function StudyPlanner() {
 
       const data = await response.json();
       setPlan(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to generate study plan. Please try again.",
+        description: getErrorMessage(error, "Failed to generate study plan. Please try again."),
         variant: "destructive",
       });
     } finally {
