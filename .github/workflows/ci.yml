@@ -32,7 +32,7 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
-      - run: for f in index.js routes/*.js utils/*.js; do node --check "$f"; done
+      - run: for f in index.js lib/*.js routes/*.js utils/*.js ../api/*.js ../api/ai/*.js; do node --check "$f"; done
 
   edge-functions:
     runs-on: ubuntu-latest
