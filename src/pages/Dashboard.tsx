@@ -56,16 +56,16 @@ export default function Dashboard() {
         setLatestAssessment(assessmentData);
       }
 
-      // Fetch all assessments for chart
+      // Fetch the 10 most recent assessments for the chart, oldest first
       const { data: allAssessments } = await supabase
         .from("assessments")
         .select("*")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: true })
+        .order("created_at", { ascending: false })
         .limit(10);
 
       if (allAssessments) {
-        setAssessments(allAssessments);
+        setAssessments([...allAssessments].reverse());
       }
 
       // Fetch latest daily log

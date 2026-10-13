@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Activity, Mail, Lock, User, Loader2 } from "lucide-react";
 import { z } from "zod";
+import { getErrorMessage } from "@/lib/utils";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -68,7 +69,7 @@ export default function Auth() {
         if (error) {
           toast({
             title: "Login failed",
-            description: error.message,
+            description: getErrorMessage(error),
             variant: "destructive",
           });
         } else {
@@ -80,7 +81,7 @@ export default function Auth() {
         if (error) {
           toast({
             title: "Sign up failed",
-            description: error.message,
+            description: getErrorMessage(error),
             variant: "destructive",
           });
         } else {

@@ -216,25 +216,29 @@ export default function Coach() {
       setAssessment(assessmentData || undefined);
       setLog(logData || undefined);
 
-      // Test API availability
+      // Test API availability. Track the result locally: the state setters below
+      // don't update `mode`/`apiAvailable` until the next render.
+      let useApi = true;
       try {
         const { error: testError } = await supabase.functions.invoke("ai-coach", {
           body: { message: "test", history: [] },
         });
         if (testError) {
           console.warn("API not available, falling back to local mode:", testError);
+          useApi = false;
           setApiAvailable(false);
           setMode("local");
         }
       } catch (err) {
         console.warn("API test failed, using local mode:", err);
+        useApi = false;
         setApiAvailable(false);
         setMode("local");
       }
 
       const intro: ChatMessage = {
         role: "assistant",
-        content: mode === "api" && apiAvailable
+        content: useApi
           ? "I'm your comprehensive student wellness coach powered by Gemini AI! 🌟\n\nI can help you with:\n• Stress management & mental health\n• Study techniques & academic performance\n• Productivity & time management\n• Sleep optimization\n• Motivation & procrastination\n• Work-life balance\n• Healthy habits & wellness\n• Exam preparation\n• Focus & concentration\n• Goal setting & more!\n\nAsk me anything about your student life, and I'll provide personalized advice based on your data!"
           : "I'm your on-device coach. No external AI keys are needed—everything here is local and rule-based. Ask me about stress, focus, breaks, sleep, study tips, productivity, or wellness and I'll tailor tips to your latest data.",
       };
@@ -246,7 +250,7 @@ export default function Coach() {
   }, [user]);
 
   const contextChips = useMemo(() => {
-    const chips: { label: string; icon: React.ComponentType<any> }[] = [];
+    const chips: { label: string; icon: React.ComponentType<{ className?: string }> }[] = [];
     if (assessment) {
       chips.push({
         label: `Stress ${assessment.score}/100 (${assessment.risk_level})`,
@@ -309,7 +313,7 @@ export default function Coach() {
       const assistantMessage: ChatMessage = { role: "assistant", content: response };
       setMessages((prev) => [...prev, assistantMessage]);
       setInput("");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       
       // Fallback to local if API fails

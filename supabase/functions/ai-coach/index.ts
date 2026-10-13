@@ -1,19 +1,34 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 type HistoryMessage = { role: "user" | "assistant"; content: string };
+type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
-serve(async (req) => {
+// Only keep well-formed user/assistant turns so clients can't inject system prompts.
+const sanitizeHistory = (history: unknown): HistoryMessage[] =>
+  Array.isArray(history)
+    ? history
+        .filter(
+          (m): m is HistoryMessage =>
+            m !== null &&
+            typeof m === "object" &&
+            (m.role === "user" || m.role === "assistant") &&
+            typeof m.content === "string",
+        )
+        .slice(-6)
+        .map(({ role, content }) => ({ role, content }))
+    : [];
+
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { message, history = [], context } = await req.json();
+    const { message, history: rawHistory, context } = await req.json();
+    const history = sanitizeHistory(rawHistory);
 
     if (!message || typeof message !== "string") {
       return new Response(
@@ -39,13 +54,12 @@ serve(async (req) => {
     }
 
     const apiKey = useLovable ? LOVABLE_API_KEY! : useOpenRouter ? OPENROUTER_API_KEY! : GEMINI_API_KEY!;
-    const useDirectGemini = !useLovable && !useOpenRouter;
     
     const model = useLovable
       ? "google/gemini-2.5-flash"
       : useOpenRouter
-        ? "google/gemini-flash-1.5-8b"
-        : "gemini-2.0-flash-exp";
+        ? "google/gemini-2.5-flash"
+        : "gemini-2.5-flash";
 
     console.log(
       "ai-coach provider",
@@ -110,7 +124,7 @@ serve(async (req) => {
       });
       
       // Add conversation history
-      for (const msg of history.slice(-6)) {
+      for (const msg of history) {
         contents.push({
           role: msg.role === "assistant" ? "model" : "user",
           parts: [{ text: msg.content }]
@@ -159,9 +173,9 @@ Provide personalized, actionable advice. Be supportive and encouraging. Give pra
 
 Keep responses conversational, include 2-3 actionable tips, suggest 2-3 micro-actions, add encouragement. Keep under 200 words unless more detail is requested. No markdown, plain text only.`;
 
-      const messages: HistoryMessage[] = [
+      const messages: ChatMessage[] = [
         {
-          role: "assistant",
+          role: "system",
           content: systemPrompt,
         },
         {
@@ -169,7 +183,7 @@ Keep responses conversational, include 2-3 actionable tips, suggest 2-3 micro-ac
           content:
             `${contextText}\n\nRemember: Address the user's question comprehensively, considering all aspects of student wellness and life, not just stress management.`,
         },
-        ...history.slice(-6) as HistoryMessage[],
+        ...history,
         { role: "user", content: message },
       ];
 

@@ -33,13 +33,21 @@ const upload = multer({
   },
   fileFilter: (req, file, cb) => {
     // Allow PDF, images, and text files
-    const allowedTypes = /jpeg|jpg|png|gif|pdf|txt|doc|docx/;
-    const extname = allowedTypes.test(
-      path.extname(file.originalname).toLowerCase()
-    );
-    const mimetype = allowedTypes.test(file.mimetype);
+    const allowedTypes = {
+      ".jpg": ["image/jpeg"],
+      ".jpeg": ["image/jpeg"],
+      ".png": ["image/png"],
+      ".gif": ["image/gif"],
+      ".pdf": ["application/pdf"],
+      ".txt": ["text/plain"],
+      ".doc": ["application/msword"],
+      ".docx": [
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ],
+    };
+    const ext = path.extname(file.originalname).toLowerCase();
 
-    if (extname && mimetype) {
+    if (allowedTypes[ext]?.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(new Error("Invalid file type. Only PDF, images, and documents are allowed."));
@@ -81,7 +89,9 @@ router.post("/upload", upload.single("file"), (req, res) => {
  */
 router.get("/upload/:filename", (req, res) => {
   try {
-    const filename = req.params.filename;
+    // Express decodes %2F in params, so strip any directory parts to keep
+    // requests like "..%2F.env" inside the uploads directory.
+    const filename = path.basename(req.params.filename);
     const filePath = path.join(uploadsDir, filename);
 
     if (!fs.existsSync(filePath)) {

@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Send, MessageSquare, Bot } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
+import { getErrorMessage } from "@/lib/utils";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
 
-const API_BASE_URL = "http://localhost:4000/api";
 
 export default function AIAssistant() {
   const [messages, setMessages] = useState<Message[]>([
@@ -64,11 +65,11 @@ export default function AIAssistant() {
       const data = await response.json();
       const assistantMessage: Message = { role: "assistant", content: data.reply };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to get AI response. Please try again.",
+        description: getErrorMessage(error, "Failed to get AI response. Please try again."),
         variant: "destructive",
       });
       setMessages((prev) => [

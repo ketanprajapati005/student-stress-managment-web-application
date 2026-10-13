@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { Moon, BookOpen, Smile, Calendar, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn, getErrorMessage } from "@/lib/utils";
 
 interface DailyLog {
   id: string;
@@ -50,10 +50,10 @@ export default function Logs() {
       if (error) throw error;
       setLogs(logs.filter((log) => log.id !== id));
       toast({ title: "Log deleted" });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Error deleting log",
-        description: error.message,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     }
