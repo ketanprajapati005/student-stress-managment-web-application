@@ -1,4 +1,4 @@
-import { callOpenRouter } from "../utils/openrouter.js";
+import { callAI } from "../utils/ai.js";
 
 const respond = (status, body) => ({ status, body });
 
@@ -18,7 +18,7 @@ export async function handleChat(body = {}) {
 
 Provide personalized, actionable advice. Be supportive and encouraging. Give practical tips and micro-actions. Keep responses conversational, include 2-3 actionable tips, suggest 2-3 micro-actions, add encouragement. Keep under 200 words unless more detail is requested. No markdown, plain text only.`;
 
-    const reply = await callOpenRouter(message, systemPrompt, history);
+    const reply = await callAI(message, systemPrompt, history);
 
     return respond(200, { reply });
   } catch (error) {

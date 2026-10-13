@@ -1,4 +1,4 @@
-import { callOpenRouter } from "../utils/openrouter.js";
+import { callAI } from "../utils/ai.js";
 
 const respond = (status, body) => ({ status, body });
 
@@ -67,7 +67,7 @@ Make the advice specific, practical, and supportive. Consider sleep optimization
 
     let aiResponse;
     try {
-      aiResponse = await callOpenRouter(prompt, systemPrompt);
+      aiResponse = await callAI(prompt, systemPrompt);
       
       // Try to parse JSON response
       let parsedResponse;
